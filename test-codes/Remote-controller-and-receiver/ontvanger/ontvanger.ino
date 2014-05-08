@@ -35,22 +35,23 @@ void loop(void)
     while (!done) //zolang done niet true is doe...
     {
       done = radio.read( &got_time, sizeof(got_time) ); // Haal de data binnen en kijk of dat de laatste data was
-      printf("Data binnengekregen: ");
-      Serial.print("RX = ");
-      Serial.print(got_time[0]);
-      Serial.print(", RY = ");
-      Serial.print(got_time[1]);
-      Serial.print(", LY = ");
-      Serial.print(got_time[2]);
-      Serial.print(", R trimm = ");
-      Serial.print(got_time[3]);
-      Serial.print(", L trim = ");
-      Serial.println(got_time[4]);
+      printf("Data binnengekregen: "); // Voor debuggen
+      Serial.print("Linker y-axis = "); // Voor debuggen
+      Serial.print(got_time[0]); // Voor debuggen
+      Serial.print(", Linker trim = "); // Voor debuggen
+      Serial.print(got_time[1]); // Voor debuggen
+      Serial.print(", Rechter y-axis = "); // Voor debuggen
+      Serial.print(got_time[2]); // Voor debuggen
+      Serial.print(", Rechter x-axis = "); // Voor debuggen
+      Serial.print(got_time[3]); // Voor debuggen
+      Serial.print(", Rechter trim = "); // Voor debuggen
+      Serial.println(got_time[4]); // Voor debuggen
 
       delay(5); // Vertraging om de stabiliteit te verhogen
     }
   }
 }
+
 
 
 
