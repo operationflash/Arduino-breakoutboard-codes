@@ -1,5 +1,5 @@
 /*
- Afstandsbedinieng code
+   Afstandsbedinieng code
  Ondersteund momenteel 5 pot's
  */
 
@@ -27,23 +27,23 @@ void setup(void)
 
 void loop(void)
 {
-  int waarde1 = analogRead(A5); // Lees adc uit en zet waarde om in een integer
-  int waarde2 = analogRead(A4); // Lees adc uit en zet waarde om in een integer
-  int waarde3 = analogRead(A3); // Lees adc uit en zet waarde om in een integer
-  int waarde4 = analogRead(A2); // Lees adc uit en zet waarde om in een integer
-  int waarde5 = analogRead(A1); // Lees adc uit en zet waarde om in een integer
+  int RX = analogRead(A5); // Lees adc uit en zet waarde om in een integer
+  int RY = analogRead(A4); // Lees adc uit en zet waarde om in een integer
+  int LY = analogRead(A3); // Lees adc uit en zet waarde om in een integer
+  int RTrim = analogRead(A2); // Lees adc uit en zet waarde om in een integer
+  int LTrim = analogRead(A1); // Lees adc uit en zet waarde om in een integer
   int waarde[5] = {
-    waarde1, waarde2, waarde3, waarde4, waarde5           }; // Zet alle integers in een array om alles in 1 keer te versturen
-  Serial.print("RX = ");
-  Serial.print(waarde[0]); // Laat de uitgelezen waarde zien voor debuggen
-  Serial.print(", RY = ");
-  Serial.print(waarde[1]); // Laat de uitgelezen waarde zien voor debuggen
-  Serial.print(", LY = ");
-  Serial.print(waarde[2]); // Laat de uitgelezen waarde zien voor debuggen
-  Serial.print(", R trimm = ");
-  Serial.print(waarde[3]); // Laat de uitgelezen waarde zien voor debuggen
-  Serial.print(", L trim = ");
-  Serial.println(waarde[4]); // Laat de uitgelezen waarde zien voor debuggen
+    LY, LTrim, RY, RX, RTrim                   }; // Zet alle integers in een array om alles in 1 keer te versturen
+  Serial.print("Linker y-axis = "); // Voor debuggen
+  Serial.print(waarde[0]); // Voor debuggen
+  Serial.print(", Linker trim = "); // Voor debuggen
+  Serial.print(waarde[1]); // Voor debuggen
+  Serial.print(", Rechter y-axis = "); // Voor debuggen
+  Serial.print(waarde[2]); // Voor debuggen
+  Serial.print(", Rechter x-axis = "); // Voor debuggen
+  Serial.print(waarde[3]); // Voor debuggen
+  Serial.print(", Rechter trim = "); // Voor debuggen
+  Serial.println(waarde[4]); // Voor debuggen
 
   printf("Verstuur pot posities...",waarde); // Print
   bool ok = radio.write( &waarde, sizeof(waarde) ); // Kijk of het versturen gelukt is
@@ -54,6 +54,10 @@ void loop(void)
 
   delay(25); // Vertraging om de stabiliteit te verhogen
 }
+
+
+
+
 
 
 
