@@ -60,10 +60,10 @@ void loop(void)
       Serial.println(got_time[4]); // Voor debuggen
 
 
-      outputPower = map(got_time[0], LYM, 1023, 225, 0); // Verander de input waarden naar waarden van 0 tot 255
+      outputPower = map(got_time[0], LYM, 1023, 255, 0); // Verander de input waarden naar waarden van 0 tot 255
       if (got_time[0] < LYM) // Mocht de y-as van de joystick toch een lagere waarde krijgen dat willen we toch maximaal achteruit
       {
-        outputAchter = 225;
+        outputAchter = 255;
       }
 
       /*
@@ -82,7 +82,7 @@ void loop(void)
         outputAchter = map(got_time[2], RYB, RYM, 0, 255); // Verander de input waarden naar waarden van 0 tot 255
         if (got_time[2] < RYM) // Mocht de y-as van de joystick toch een lagere waarde krijgen dat willen we toch maximaal achteruit
         {
-          outputAchter = 225;
+          outputAchter = 255;
         }
       }
 
@@ -97,7 +97,7 @@ void loop(void)
         outputLinks = map(got_time[3], RXB, RXM, 0, 255); // Verander de input waarden naar waarden van 0 tot 255
         if (got_time[3] < RXM) // Mocht de x-as van de joystick toch een lagere waarde krijgen dat willen we toch maximaal achteruit
         {
-          outputLinks = 225;
+          outputLinks = 255;
         }
       }
 
@@ -116,28 +116,9 @@ void loop(void)
       analogWrite(5, outputPower); // Stuur PWM signaal naar de hoofdrotors
 
       delay(5); // Vertraging om de stabiliteit te verhogen
+
     }
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
