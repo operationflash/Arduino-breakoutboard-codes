@@ -6,16 +6,26 @@
 #include "nRF24L01.h"
 #include "RF24.h"
 #include "printf.h"
-const int RXB = 705; // Rustpositie waarde van de x-as van de rechter joystick
-const int RYB = 708; // Rustpositie waarde van de y-as van de rechter joystick
-const byte RXM = 169; // Minimale waarde van de x-as van de rechter joystick
-const byte RYM = 255; // Minimale waarde van de x-as van de rechter joystick
-const byte LYM = 200; // Minimale waarde van de x-as van de rechter joystick
+
+// Alle declaraties voor in de sketch
+bool timeout; // timeout is een boolean
 byte outputVoor = 0;
 byte outputAchter = 0;
 byte outputLinks = 0;
 byte outputRechts = 0;
 byte outputPower = 0;
+byte maxTijd = 75; // Maximale wachtijd voor ontvangst van data voor timeout
+const byte powerPoort = 5; // Power control pin
+const byte HAPoort = 6; // H-brug control pin 1
+const byte HVPoort = 3; //  H-brug control pin 2
+const byte RXM = 169; // Minimale waarde van de x-as van de rechter joystick
+const byte RYM = 255; // Minimale waarde van de x-as van de rechter joystick
+const byte LYM = 200; // Minimale waarde van de x-as van de rechter joystick
+const int RXB = 705; // Rustpositie waarde van de x-as van de rechter joystick
+const int RYB = 708; // Rustpositie waarde van de y-as van de rechter joystick
+int got_data[5]; // Dit is een array om de ontvangen data in op te slaan
+unsigned long startTijd;
+
 
 RF24 radio(9,10); // Juiste connecties voor de tranceiver
 const uint64_t pipe = 0xF0F0F0F0D2LL; // Stel communicatie adress in
@@ -33,92 +43,102 @@ void setup(void)
   radio.printDetails(); // Print hoe de tranceiver is ingesteld
   printf("De ontvanger is ingesteld\n\r"); // Voor debuggen
   printf("Nu wachten op data...\n\r"); // Voor debuggen
-  pinMode(3, OUTPUT); // Stel pin in als output
-  pinMode(6, OUTPUT); // Stel pin in als output
 }
 
 void loop(void)
 {
-  if ( radio.available() ) // Is de data klaar?
+  timeout = false; // Zet timeout boolean naar 0
+  startTijd = millis(); // Starttijd is uptime Arduino
+
+  while ( ! radio.available() && ! timeout ) // Als er geen rimeout is en radio is niet beschikbaar doe...
+    if (millis() - startTijd > maxTijd ) // Controllerd of de maximale wachttijd verstreken is
+      timeout = true; // timeout is waar
+
+  if ( timeout ) // Als er een timeout is
   {
-    // Dump the payloads until we've gotten everything
-    int got_time[5]; // Dit is een array om de ontvangen data in op te slaan
-    bool done = false; // boolean done is false
-    while (!done) //zolang done niet true is doe...
+    Serial.println("Geen ontvangst, NOODSTOP"); // Voor debuggen
+    analogWrite(powerPoort, 0); // Stuur uit signaal naar de hoofdrotors
+    analogWrite(HAPoort, 0); // Stuur uit signaal naar h-brug
+    analogWrite(HVPoort, 0); // Stuur uit signaal naar h-brug
+  }
+  else // Als er data wordt ontvangen.
+  {
+    radio.read( &got_data, sizeof(got_data) ); // Lees ontvangen data uit
+    printf("Data binnengekregen: "); // Voor debuggen
+    Serial.print("Linker y-axis = "); // Voor debuggen
+    Serial.print(got_data[0]); // Voor debuggen
+    Serial.print(", Linker trim = "); // Voor debuggen
+    Serial.print(got_data[1]); // Voor debuggen
+    Serial.print(", Rechter y-axis = "); // Voor debuggen
+    Serial.print(got_data[2]); // Voor debuggen
+    Serial.print(", Rechter x-axis = "); // Voor debuggen
+    Serial.print(got_data[3]); // Voor debuggen
+    Serial.print(", Rechter trim = "); // Voor debuggen
+    Serial.println(got_data[4]); // Voor debuggen
+
+
+    outputPower = map(got_data[0], LYM, 1023, 255, 0); // Verander de input waarden naar waarden van 0 tot 255
+    if (got_data[0] < LYM) // Mocht de y-as van de joystick toch een lagere waarde krijgen dat willen we toch maximaal achteruit
     {
-      done = radio.read( &got_time, sizeof(got_time) ); // Haal de data binnen en kijk of dat de laatste data was
-      printf("Data binnengekregen: "); // Voor debuggen
-      Serial.print("Linker y-axis = "); // Voor debuggen
-      Serial.print(got_time[0]); // Voor debuggen
-      Serial.print(", Linker trim = "); // Voor debuggen
-      Serial.print(got_time[1]); // Voor debuggen
-      Serial.print(", Rechter y-axis = "); // Voor debuggen
-      Serial.print(got_time[2]); // Voor debuggen
-      Serial.print(", Rechter x-axis = "); // Voor debuggen
-      Serial.print(got_time[3]); // Voor debuggen
-      Serial.print(", Rechter trim = "); // Voor debuggen
-      Serial.println(got_time[4]); // Voor debuggen
+      outputAchter = 255;
+    }
 
-
-      outputPower = map(got_time[0], LYM, 1023, 255, 0); // Verander de input waarden naar waarden van 0 tot 255
-      if (got_time[0] < LYM) // Mocht de y-as van de joystick toch een lagere waarde krijgen dat willen we toch maximaal achteruit
+    if (got_data[2] >= RYB) // We willen naar voren als de joystick omhoog geduwd wordt
+    {
+      outputVoor = map(got_data[2], RYB, 1023, 0, 255); // Verander de input waarden naar waarden van 0 tot 255
+      outputAchter = 0; // Belangrijk voor de h-brug die we gebruiken
+    }
+    else if (got_data[2] < RYB) // We willen naar achter als de joystick omlaag geduwd wordt
+    {
+      outputVoor = 0; // Belangrijk voor de h-brug die we gebruiken
+      outputAchter = map(got_data[2], RYB, RYM, 0, 255); // Verander de input waarden naar waarden van 0 tot 255
+      if (got_data[2] < RYM) // Mocht de y-as van de joystick toch een lagere waarde krijgen dat willen we toch maximaal achteruit
       {
         outputAchter = 255;
       }
-
-      /*
-       708 is de normale positie van de y-as van de rechter joystick bij de controller waar deze code voor wordt gemaakt
-       225 is de laagste waarde die de y-s van de rechter joystick krijgt
-       */
-
-      if (got_time[2] >= RYB) // We willen naar voren als de joystick omhoog geduwd wordt
-      {
-        outputVoor = map(got_time[2], RYB, 1023, 0, 255); // Verander de input waarden naar waarden van 0 tot 255
-        outputAchter = 0; // Belangrijk voor de h-brug die we gebruiken
-      }
-      else if (got_time[2] < RYB) // We willen naar achter als de joystick omlaag geduwd wordt
-      {
-        outputVoor = 0; // Belangrijk voor de h-brug die we gebruiken
-        outputAchter = map(got_time[2], RYB, RYM, 0, 255); // Verander de input waarden naar waarden van 0 tot 255
-        if (got_time[2] < RYM) // Mocht de y-as van de joystick toch een lagere waarde krijgen dat willen we toch maximaal achteruit
-        {
-          outputAchter = 255;
-        }
-      }
-
-      if (got_time[3] >= RXB) // We willen naar voren als de joystick omhoog geduwd wordt
-      {
-        outputRechts = map(got_time[3], RXB, 1023, 0, 255); // Verander de input waarden naar waarden van 0 tot 255
-        outputLinks = 0; // Belangrijk voor de h-brug die we gebruiken
-      }
-      else if (got_time[3] < RXB) // We willen naar achter als de joystick omlaag geduwd wordt
-      {
-        outputRechts = 0; // Belangrijk voor de h-brug die we gebruiken
-        outputLinks = map(got_time[3], RXB, RXM, 0, 255); // Verander de input waarden naar waarden van 0 tot 255
-        if (got_time[3] < RXM) // Mocht de x-as van de joystick toch een lagere waarde krijgen dat willen we toch maximaal achteruit
-        {
-          outputLinks = 255;
-        }
-      }
-
-      Serial.print(outputPower); // Voor debuggen
-      Serial.print(", "); // Voor debuggen
-      Serial.print(outputVoor); // Voor debuggen
-      Serial.print(", "); // Voor debuggen
-      Serial.print(outputAchter); // Voor debuggen
-      Serial.print(", "); // Voor debuggen
-      Serial.print(outputLinks); // Voor debuggen
-      Serial.print(", "); // Voor debuggen
-      Serial.println(outputRechts); // Voor debuggen
-
-      analogWrite(6, outputVoor); // Stuur PWM signaal naar h-brug
-      analogWrite(3, outputAchter); // Stuur PWM signaal naar h-brug
-      analogWrite(5, outputPower); // Stuur PWM signaal naar de hoofdrotors
-
-      delay(5); // Vertraging om de stabiliteit te verhogen
-
     }
+
+    if (got_data[3] >= RXB) // We willen naar voren als de joystick omhoog geduwd wordt
+    {
+      outputRechts = map(got_data[3], RXB, 1023, 0, 255); // Verander de input waarden naar waarden van 0 tot 255
+      outputLinks = 0; // Belangrijk voor de h-brug die we gebruiken
+    }
+    else if (got_data[3] < RXB) // We willen naar achter als de joystick omlaag geduwd wordt
+    {
+      outputRechts = 0; // Belangrijk voor de h-brug die we gebruiken
+      outputLinks = map(got_data[3], RXB, RXM, 0, 255); // Verander de input waarden naar waarden van 0 tot 255
+      if (got_data[3] < RXM) // Mocht de x-as van de joystick toch een lagere waarde krijgen dat willen we toch maximaal achteruit
+      {
+        outputLinks = 255;
+      }
+    }
+
+    Serial.print(outputPower); // Voor debuggen
+    Serial.print(", "); // Voor debuggen
+    Serial.print(outputVoor); // Voor debuggen
+    Serial.print(", "); // Voor debuggen
+    Serial.print(outputAchter); // Voor debuggen
+    Serial.print(", "); // Voor debuggen
+    Serial.print(outputLinks); // Voor debuggen
+    Serial.print(", "); // Voor debuggen
+    Serial.println(outputRechts); // Voor debuggen
+
+    analogWrite(powerPoort, outputPower); // Stuur PWM signaal naar de hoofdrotors
+    analogWrite(HAPoort, outputAchter); // Stuur PWM signaal naar h-brug
+    analogWrite(HVPoort, outputVoor); // Stuur PWM signaal naar h-brug
+
+    delay(5); // Vertraging om de stabiliteit te verhogen
   }
 }
+
+
+
+
+
+
+
+
+
+
 
 
