@@ -14,6 +14,8 @@ byte outputAchter = 0;
 byte outputLinks = 0;
 byte outputRechts = 0;
 byte outputPower = 0;
+int trimAdjust1 = 0;
+int trimAdjust2 = 0;
 byte maxTijd = 75; // Maximale wachtijd voor ontvangst van data voor timeout
 const byte powerPoort = 5; // Power control pin
 const byte HAPoort = 6; // H-brug control pin 1
@@ -25,7 +27,6 @@ const int RXB = 705; // Rustpositie waarde van de x-as van de rechter joystick
 const int RYB = 708; // Rustpositie waarde van de y-as van de rechter joystick
 int got_data[5]; // Dit is een array om de ontvangen data in op te slaan
 unsigned long startTijd;
-
 
 RF24 radio(9,10); // Juiste connecties voor de tranceiver
 const uint64_t pipe = 0xF0F0F0F0D2LL; // Stel communicatie adress in
@@ -76,6 +77,11 @@ void loop(void)
     Serial.print(", Rechter trim = "); // Voor debuggen
     Serial.println(got_data[4]); // Voor debuggen
 
+    trimAdjust1 = map(got_data[1], 175, 1023, -100, 100); // Remap the left trim for adjusting the PWM signals
+    trimAdjust2 = map(got_data[4], 110, 1023, -100, 100); // Remap the right trim for adjusting the PWM signals
+    Serial.print (trimAdjust1); // Voor debuggen
+    Serial.print (" / "); // Voor debuggen
+    Serial.println (trimAdjust2); // Voor debuggen
 
     outputPower = map(got_data[0], LYM, 1023, 255, 0); // Verander de input waarden naar waarden van 0 tot 255
     if (got_data[0] < LYM) // Mocht de y-as van de joystick toch een lagere waarde krijgen dat willen we toch maximaal achteruit
@@ -130,6 +136,7 @@ void loop(void)
     delay(5); // Vertraging om de stabiliteit te verhogen
   }
 }
+
 
 
 
