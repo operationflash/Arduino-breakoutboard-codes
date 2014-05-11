@@ -81,24 +81,29 @@ void loop(void)
     trimAdjust2 = map(got_data[4], 110, 1023, -100, 100); // Remap the right trim for adjusting the PWM signals
     got_data[2] = got_data[2] + trimAdjust1; // Manupileer de y-as van de rechter joystick met de rechter trim waarde
 
-
-
     outputPower = map(got_data[0], LYM, 1023, 255, 0); // Verander de input waarden naar waarden van 0 tot 255
     if (got_data[0] < LYM) // Mocht de y-as van de joystick toch een lagere waarde krijgen dat willen we toch maximaal achteruit
     {
-      outputAchter = 255;
+      outputPower = 255;
     }
 
     if (got_data[2] >= RYB) // We willen naar voren als de joystick omhoog geduwd wordt
     {
-      outputVoor = map(got_data[2], RYB, 1123, 0, 255); // Verander de input waarden naar waarden van 0 tot 255
+      outputVoor = map(got_data[2], RYB, 1023, 0, 255); // Verander de input waarden naar waarden van 0 tot 255
       outputAchter = 0; // Belangrijk voor de h-brug die we gebruiken
+
+      if (got_data[2] > 1023) // Overshoot correctie die veroorzaakt kan worden door de trim
+      {
+        outputVoor = 255;
+      }
+
     }
     else if (got_data[2] < RYB) // We willen naar achter als de joystick omlaag geduwd wordt
     {
       outputVoor = 0; // Belangrijk voor de h-brug die we gebruiken
-      outputAchter = map(got_data[2], RYB-100, RYM, 0, 255); // Verander de input waarden naar waarden van 0 tot 255
-      if (got_data[2] < RYM) // Mocht de y-as van de joystick toch een lagere waarde krijgen dat willen we toch maximaal achteruit
+      outputAchter = map(got_data[2], RYB-1, RYM, 0, 255); // Verander de input waarden naar waarden van 0 tot 255
+
+        if (got_data[2] < RYM) // Mocht de y-as van de joystick toch een lagere waarde krijgen dat willen we toch maximaal achteruit
       {
         outputAchter = 255;
       }
@@ -136,17 +141,6 @@ void loop(void)
     delay(5); // Vertraging om de stabiliteit te verhogen
   }
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 
