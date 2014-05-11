@@ -79,9 +79,9 @@ void loop(void)
 
     trimAdjust1 = map(got_data[1], 175, 1023, -100, 100); // Remap the left trim for adjusting the PWM signals
     trimAdjust2 = map(got_data[4], 110, 1023, -100, 100); // Remap the right trim for adjusting the PWM signals
-    Serial.print (trimAdjust1); // Voor debuggen
-    Serial.print (" / "); // Voor debuggen
-    Serial.println (trimAdjust2); // Voor debuggen
+    got_data[2] = got_data[2] + trimAdjust1; // Manupileer de y-as van de rechter joystick met de rechter trim waarde
+
+
 
     outputPower = map(got_data[0], LYM, 1023, 255, 0); // Verander de input waarden naar waarden van 0 tot 255
     if (got_data[0] < LYM) // Mocht de y-as van de joystick toch een lagere waarde krijgen dat willen we toch maximaal achteruit
@@ -91,13 +91,13 @@ void loop(void)
 
     if (got_data[2] >= RYB) // We willen naar voren als de joystick omhoog geduwd wordt
     {
-      outputVoor = map(got_data[2], RYB, 1023, 0, 255); // Verander de input waarden naar waarden van 0 tot 255
+      outputVoor = map(got_data[2], RYB, 1123, 0, 255); // Verander de input waarden naar waarden van 0 tot 255
       outputAchter = 0; // Belangrijk voor de h-brug die we gebruiken
     }
     else if (got_data[2] < RYB) // We willen naar achter als de joystick omlaag geduwd wordt
     {
       outputVoor = 0; // Belangrijk voor de h-brug die we gebruiken
-      outputAchter = map(got_data[2], RYB, RYM, 0, 255); // Verander de input waarden naar waarden van 0 tot 255
+      outputAchter = map(got_data[2], RYB-100, RYM, 0, 255); // Verander de input waarden naar waarden van 0 tot 255
       if (got_data[2] < RYM) // Mocht de y-as van de joystick toch een lagere waarde krijgen dat willen we toch maximaal achteruit
       {
         outputAchter = 255;
@@ -136,6 +136,8 @@ void loop(void)
     delay(5); // Vertraging om de stabiliteit te verhogen
   }
 }
+
+
 
 
 
