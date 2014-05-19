@@ -5,10 +5,10 @@ const int buttonPin4 = 6;     // dip 4 is op deze pin aangesloten
 const int ledPin =  9;        // de led is op deze pin aangesloten
 
 // variables will change:
-int buttonState1 = 0;         // variabele voor het uitlezen van dip 1
-int buttonState2 = 0;         // variabele voor het uitlezen van dip 1
-int buttonState3 = 0;         // variabele voor het uitlezen van dip 1
-int buttonState4 = 0;         // variabele voor het uitlezen van dip 1
+byte buttonState1 = 0;         // variabele voor het uitlezen van dip 1
+byte buttonState2 = 0;         // variabele voor het uitlezen van dip 1
+byte buttonState3 = 0;         // variabele voor het uitlezen van dip 1
+byte buttonState4 = 0;         // variabele voor het uitlezen van dip 1
 
 void setup() {
 
