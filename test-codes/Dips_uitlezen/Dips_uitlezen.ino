@@ -6,9 +6,9 @@ const int ledPin =  9;        // de led is op deze pin aangesloten
 
 // variables will change:
 byte buttonState1 = 0;         // variabele voor het uitlezen van dip 1
-byte buttonState2 = 0;         // variabele voor het uitlezen van dip 1
-byte buttonState3 = 0;         // variabele voor het uitlezen van dip 1
-byte buttonState4 = 0;         // variabele voor het uitlezen van dip 1
+byte buttonState2 = 0;         // variabele voor het uitlezen van dip 2
+byte buttonState3 = 0;         // variabele voor het uitlezen van dip 3
+byte buttonState4 = 0;         // variabele voor het uitlezen van dip 4
 
 void setup() {
 
