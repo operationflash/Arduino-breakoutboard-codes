@@ -12,16 +12,16 @@ RF24 radio(9,10); // Juiste connecties voor de tranceiver
 
 const uint64_t pipe = 0xF0F0F0F0D2LL; // Stel communicatie adress in
 
-const int buttonPin1 = 3;     // dip 1 is op deze pin aangesloten
-const int buttonPin2 = 4;     // dip 2 is op deze pin aangesloten
-const int buttonPin3 = 5;     // dip 3 is op deze pin aangesloten
-const int buttonPin4 = 6;     // dip 4 is op deze pin aangesloten
+const int buttonPin1 = 3;     // Dip 1 is op deze pin aangesloten
+const int buttonPin2 = 4;     // Dip 2 is op deze pin aangesloten
+const int buttonPin3 = 5;     // Dip 3 is op deze pin aangesloten
+const int buttonPin4 = 6;     // Dip 4 is op deze pin aangesloten
 
 // Dit zijn variabele
-int Schakelaar1 = 0; // Byte declaratie
-int Schakelaar2 = 0; // Byte declaratie
-int Schakelaar3 = 0; // Byte declaratie
-int Schakelaar4 = 0; // Byte declaratie
+int Schakelaar1 = 0; // Int declaratie
+int Schakelaar2 = 0; // Int declaratie
+int Schakelaar3 = 0; // Int declaratie
+int Schakelaar4 = 0; // Int declaratie
 
 void setup(void)
 {
@@ -32,7 +32,7 @@ void setup(void)
   Serial.begin(57600);
   printf_begin(); // Start printf code
   radio.begin(); // Start tranceiver code
-  radio.setRetries(15,15); // tijd tussen herzendingen, # herzendingen
+  radio.setRetries(15,15); // Tijd tussen herzendingen, # herzendingen
   radio.setDataRate( RF24_2MBPS ); // Stel de communicatiesnelheid in (RF24_250KBPS of RF24_1MBPS of RF24_2MBPS)
   radio.setChannel(76); // Stel communicatiekanaal in (0-127)
   radio.openWritingPipe(pipe); // Open communicatie lijn om te kunnen zenden
@@ -48,7 +48,7 @@ void loop(void)
   Schakelaar4 = digitalRead(buttonPin4); // Lees dip uit
 
   int Schakelaars[4] = {
-    Schakelaar1,  Schakelaar2,  Schakelaar3,  Schakelaar4                                       }; // Zet bytes in een array om alles in 1 keer te versturen
+    Schakelaar1,  Schakelaar2,  Schakelaar3,  Schakelaar4                                       }; // Zet ints in een array om alles in 1 keer te versturen
 
   Serial.print("Schakelaar1 =  "); // Voor debuggen
   Serial.print(Schakelaars[0]); // Voor debuggen
